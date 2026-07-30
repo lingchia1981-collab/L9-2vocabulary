@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Word Quest</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #f0f8ff;
+            color: #4a4a4a;
+            font-family: "Comic Sans MS", "Microsoft JhengHei", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+        }
+        #game-container {
+            position: relative;
+            width: 500px;
+            height: 580px;
+            background: #ffffff;
+            border: 3px solid #bae6fd;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(186, 230, 253, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        #header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: bold;
+            background: #e0f2fe;
+            color: #0284c7;
+            padding: 6px 12px;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        #question-box {
+            width: 100%;
+            background: #fef08a;
+            border: 2px solid #38bdf8;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0369a1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        @keyframes floatAni {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes bounceAni {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .cute-icon-top {
+            position: absolute;
+            top: 4px;
+            left: 10px;
+            font-size: 20px;
+            animation: floatAni 2s infinite ease-in-out;
+        }
+        .cute-icon-top-right {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            font-size: 20px;
+            animation: bounceAni 1.5s infinite ease-in-out;
+        }
+        .audio-btn {
+            background: #38bdf8;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 6px;
+            box-shadow: 0 2px 6px rgba(56, 189, 248, 0.3);
+            transition: all 0.2s;
+        }
+        .audio-btn:hover {
+            background: #0ea5e9;
+            transform: scale(1.05);
+        }
+        .section-title {
+            font-size: 16px;
+            color: #0284c7;
+            margin: 2px 0;
+            align-self: flex-start;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        @keyframes starSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        .section-title span {
+            animation: starSpin 3s infinite linear;
+            display: inline-block;
+        }
+        .options-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .option-btn {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            color: #15803d;
+            padding: 12px 8px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+            transition: all 0.1s;
+            text-align: center;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .option-btn:hover {
+            background: #bbf7d0;
+            color: #14532d;
+            transform: scale(1.02);
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+        }
+        .option-btn.selected {
+            background: #38bdf8 !important;
+            border-color: #0284c7 !important;
+            color: white !important;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+        }
+        #submit-btn {
+            background: #bae6fd;
+            border: 2px solid #38bdf8;
+            color: #0369a1;
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+            transition: all 0.2s;
+        }
+        #submit-btn:hover {
+            background: #38bdf8;
+            color: white;
+            transform: scale(1.01);
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+        }
+        #message-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(240, 248, 255, 0.96);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+        }
+        #message-overlay h2 {
+            color: #0284c7;
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+        #message-overlay p {
+            font-size: 18px;
+            color: #0369a1;
+            line-height: 1.4;
+            margin-bottom: 18px;
+        }
+        .start-btn {
+            background: #38bdf8;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+            box-shadow: 0 3px 10px rgba(56, 189, 248, 0.4);
+            transition: all 0.2s;
+        }
+        .start-btn:hover {
+            background: #0ea5e9;
+            transform: scale(1.05);
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
+        }
+        .bullet {
+            position: absolute;
+            width: 14px;
+            height: 26px;
+            background: #0ea5e9;
+            border-radius: 7px;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 0 8px #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="header">
+        <span id="score-display">⭐ Score: 0</span>
+        <span id="progress-display">🎯 1 / 12</span>
+    </div>
+
+    <div id="question-box">
+        <span class="cute-icon-top">💛💛</span>
+        <span class="cute-icon-top-right">🐬💧</span>
+        <span>Listen & match!</span>
+        <button class="audio-btn" id="audio-play-btn" type="button" onclick="playGoogleTranslateAudio()">🔊 Play Audio</button>
+    </div>
+
+    <div class="section-title"><span>⭐</span> Select Pinyin</div>
+    <div id="pinyin-options" class="options-grid"></div>
+
+    <div class="section-title"><span>⭐</span> Select Hanzi</div>
+    <div id="hanzi-options" class="options-grid"></div>
+
+    <button id="submit-btn" type="button" onclick="checkAnswer()">✨ Submit ✨</button>
+
+    <div id="message-overlay">
+        <h2 id="overlay-title">🌟 Sweet Word Quest 🌟</h2>
+        <p id="overlay-desc">Match Pinyin and Hanzi! 🐳✨<br>Click options to shoot targets! 🎯🔫</p>
+        <button class="start-btn" id="action-btn" type="button" onclick="startGame()">Play 🚀</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { word: "號", pinyin: "hào", pinyinOptions: ["hào", "guàng", "gěi", "huángsè"], hanziOptions: ["號", "逛", "給", "黃色"] },
+        { word: "建議", pinyin: "jiànyì", pinyinOptions: ["jiànyì", "yīnggāi", "tèbié", "juédìng"], hanziOptions: ["建議", "應該", "特別", "決定"] },
+        { word: "夜市", pinyin: "yèshì", pinyinOptions: ["yèshì", "huángsè", "mángguǒ", "xīguā"], hanziOptions: ["夜市", "黃色", "芒果", "西瓜"] },
+        { word: "應該", pinyin: "yīnggāi", pinyinOptions: ["yīnggāi", "jiànyì", "juédìng", "tèbié"], hanziOptions: ["應該", "建議", "決定", "特別"] },
+        { word: "逛", pinyin: "guàng", pinyinOptions: ["guàng", "gěi", "hào", "yèshì"], hanziOptions: ["逛", "給", "號", "夜市"] },
+        { word: "特別", pinyin: "tèbié", pinyinOptions: ["tèbié", "yīnggāi", "jiànyì", "huángsè"], hanziOptions: ["特別", "應該", "建議", "黃色"] },
+        { word: "決定", pinyin: "juédìng", pinyinOptions: ["juédìng", "tèbié", "yīnggāi", "jiànyì"], hanziOptions: ["決定", "特別", "應該", "建議"] },
+        { word: "黃色", pinyin: "huángsè", pinyinOptions: ["huángsè", "hóngsè", "mángguǒ", "xīguā"], hanziOptions: ["黃色", "紅色", "芒果", "西瓜"] },
+        { word: "芒果", pinyin: "mángguǒ", pinyinOptions: ["mángguǒ", "xīguā", "huángsè", "hóngsè"], hanziOptions: ["芒果", "西瓜", "黃色", "紅色"] },
+        { word: "給", pinyin: "gěi", pinyinOptions: ["gěi", "guàng", "hào", "yèshì"], hanziOptions: ["給", "逛", "號", "夜市"] },
+        { word: "紅色", pinyin: "hóngsè", pinyinOptions: ["hóngsè", "huángsè", "xīguā", "mángguǒ"], hanziOptions: ["紅色", "黃色", "西瓜", "芒果"] },
+        { word: "西瓜", pinyin: "xīguā", pinyinOptions: ["xīguā", "mángguǒ", "hóngsè", "yèshì"], hanziOptions: ["西瓜", "芒果", "紅色", "夜市"] }
+    ];
+
+    let shuffledQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let selectedPinyin = null;
+    let selectedHanzi = null;
+    let backgroundMusic = null;
+    let currentAudio = null;
+    let audioCtx = null;
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playSuccessSound() {
+        initAudioContext();
+        try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.1);
+            osc.frequency.setValueAtTime(783.99, now + 0.2);
+            osc.frequency.setValueAtTime(1046.50, now + 0.3);
+
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.6);
+        } catch (e) {
+            console.log("Sound play error", e);
+        }
+    }
+
+    function playErrorSound() {
+        initAudioContext();
+        try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.setValueAtTime(200, now + 0.15);
+
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } catch (e) {
+            console.log("Sound play error", e);
+        }
+    }
+
+    function initBackgroundMusic() {
+        if (backgroundMusic) return;
+        try {
+            initAudioContext();
+            const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50];
+
+            function playNote() {
+                if (audioCtx.state === 'suspended') return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(notes[Math.floor(Math.random() * notes.length)], audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            }
+            backgroundMusic = setInterval(playNote, 1200);
+        } catch (e) {
+            console.log("Web Audio API not supported", e);
+        }
+    }
+
+    function playGoogleTranslateAudio() {
+        if (currentIndex >= shuffledQuestions.length) return;
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        const q = shuffledQuestions[currentIndex];
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(q.word)}&tl=zh-TW&client=tw-ob`;
+        currentAudio = new Audio(audioUrl);
+        currentAudio.play().catch(error => {
+            console.log("Audio play failed, fallback to synthesis:", error);
+            fallbackSpeech(q.word);
+        });
+    }
+
+    function fallbackSpeech(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function startGame() {
+        initBackgroundMusic();
+        shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+        currentIndex = 0;
+        score = 0;
+        document.getElementById('score-display').innerText = `⭐ Score: ${score}`;
+        document.getElementById('message-overlay').style.display = 'none';
+        loadQuestion();
+    }
+
+    function shootBulletToTarget(targetElement, callback) {
+        const container = document.getElementById('game-container');
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+
+        const bullet = document.createElement('div');
+        bullet.className = 'bullet';
+        const startX = containerRect.width / 2 - 7;
+        const startY = containerRect.height - 20;
+        bullet.style.left = `${startX}px`;
+        bullet.style.top = `${startY}px`;
+        container.appendChild(bullet);
+
+        const destX = targetRect.left - containerRect.left + targetRect.width / 2 - 7;
+        const destY = targetRect.top - containerRect.top + targetRect.height / 2 - 13;
+
+        bullet.style.transition = 'all 0.15s ease-out';
+        setTimeout(() => {
+            bullet.style.left = `${destX}px`;
+            bullet.style.top = `${destY}px`;
+        }, 20);
+
+        setTimeout(() => {
+            bullet.remove();
+            if (callback) callback();
+        }, 170);
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= shuffledQuestions.length) {
+            endGame();
+            return;
+        }
+
+        selectedPinyin = null;
+        selectedHanzi = null;
+        
+        const q = shuffledQuestions[currentIndex];
+        document.getElementById('progress-display').innerText = `🎯 ${currentIndex + 1} / 12`;
+        document.getElementById('score-display').innerText = `⭐ Score: ${score}`;
+
+        playGoogleTranslateAudio();
+
+        let shuffledPinyin = [...q.pinyinOptions].sort(() => Math.random() - 0.5);
+        let shuffledHanzi = [...q.hanziOptions].sort(() => Math.random() - 0.5);
+
+        const pinyinContainer = document.getElementById('pinyin-options');
+        pinyinContainer.innerHTML = '';
+        shuffledPinyin.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.type = 'button';
+            btn.innerText = p;
+            btn.onclick = () => {
+                shootBulletToTarget(btn, () => {
+                    pinyinContainer.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedPinyin = p;
+                });
+            };
+            pinyinContainer.appendChild(btn);
+        });
+
+        const hanziContainer = document.getElementById('hanzi-options');
+        hanziContainer.innerHTML = '';
+        shuffledHanzi.forEach(h => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.type = 'button';
+            btn.innerText = h;
+            btn.onclick = () => {
+                shootBulletToTarget(btn, () => {
+                    hanziContainer.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedHanzi = h;
+                });
+            };
+            hanziContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer() {
+        if (!selectedPinyin || !selectedHanzi) {
+            alert("Please select both Pinyin and Hanzi! 🐾");
+            return;
+        }
+
+        const q = shuffledQuestions[currentIndex];
+        const isCorrectPinyin = (selectedPinyin === q.pinyin);
+        const isCorrectHanzi = (selectedHanzi === q.word);
+
+        if (isCorrectPinyin && isCorrectHanzi) {
+            score += 10;
+            document.getElementById('score-display').innerText = `⭐ Score: ${score}`;
+            playSuccessSound();
+            showFeedback(true, `🌟 Great job! (+10 pts) 🌟\nTarget: ${q.word} (${q.pinyin})`);
+        } else {
+            playErrorSound();
+            showFeedback(false, `💫 Oops! 💫\nCorrect: ${q.word} (${q.pinyin})\nYours: ${selectedHanzi} (${selectedPinyin})`);
+        }
+    }
+
+    function showFeedback(isCorrect, message) {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        const overlay = document.getElementById('message-overlay');
+        const title = document.getElementById('overlay-title');
+        const desc = document.getElementById('overlay-desc');
+        const btn = document.getElementById('action-btn');
+
+        overlay.style.display = 'flex';
+        title.innerText = isCorrect ? "🎉 Awesome! 🎉" : "🎈 Try Again! 🎈";
+        desc.innerText = message;
+        btn.innerText = "Next 🚀";
+        btn.onclick = nextQuestion;
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        document.getElementById('message-overlay').style.display = 'none';
+        loadQuestion();
+    }
+
+    function endGame() {
+        if (backgroundMusic) {
+            clearInterval(backgroundMusic);
+            backgroundMusic = null;
+        }
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        const overlay = document.getElementById('message-overlay');
+        const title = document.getElementById('overlay-title');
+        const desc = document.getElementById('overlay-desc');
+        const btn = document.getElementById('action-btn');
+
+        overlay.style.display = 'flex';
+        title.innerText = "🏆 You Win! 🏆";
+        desc.innerText = `Final Score: ${score} points! You are amazing! 🦄✨`;
+        btn.innerText = "Play Again 💖";
+        btn.onclick = startGame;
+    }
+</script>
+
+</body>
+</html>
