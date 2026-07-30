@@ -19,8 +19,8 @@
         }
         #game-container {
             position: relative;
-            width: 500px;
-            height: 580px;
+            width: 520px;
+            height: 600px;
             background: #ffffff;
             border: 3px solid #bae6fd;
             border-radius: 20px;
@@ -129,8 +129,8 @@
             background: #f0fdf4;
             border: 2px solid #86efac;
             color: #15803d;
-            padding: 12px 8px;
-            font-size: 24px;
+            padding: 10px 8px;
+            font-size: 22px;
             font-weight: bold;
             border-radius: 25px;
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%230284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="1" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="1" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="23" y2="12"/><circle cx="12" cy="12" r="1.5" fill="%230284c7"/></svg>') 18 18, auto;
@@ -232,7 +232,7 @@
 <div id="game-container">
     <div id="header">
         <span id="score-display">⭐ Score: 0</span>
-        <span id="progress-display">🎯 1 / 12</span>
+        <span id="progress-display">🎯 1 / 25</span>
     </div>
 
     <div id="question-box">
@@ -270,7 +270,19 @@
         { word: "芒果", pinyin: "mángguǒ", pinyinOptions: ["mángguǒ", "xīguā", "huángsè", "hóngsè"], hanziOptions: ["芒果", "西瓜", "黃色", "紅色"] },
         { word: "給", pinyin: "gěi", pinyinOptions: ["gěi", "guàng", "hào", "yèshì"], hanziOptions: ["給", "逛", "號", "夜市"] },
         { word: "紅色", pinyin: "hóngsè", pinyinOptions: ["hóngsè", "huángsè", "xīguā", "mángguǒ"], hanziOptions: ["紅色", "黃色", "西瓜", "芒果"] },
-        { word: "西瓜", pinyin: "xīguā", pinyinOptions: ["xīguā", "mángguǒ", "hóngsè", "yèshì"], hanziOptions: ["西瓜", "芒果", "紅色", "夜市"] }
+        { word: "西瓜", pinyin: "xīguā", pinyinOptions: ["xīguā", "mángguǒ", "hóngsè", "yèshì"], hanziOptions: ["西瓜", "芒果", "紅色", "夜市"] },
+        { word: "拍", pinyin: "pāi", pinyinOptions: ["pāi", "xiào", "chuān", "lǚguǎn"], hanziOptions: ["拍", "笑", "穿", "旅館"] },
+        { word: "笑", pinyin: "xiào", pinyinOptions: ["xiào", "pāi", "nán", "ǎi"], hanziOptions: ["笑", "拍", "男", "矮"] },
+        { word: "穿", pinyin: "chuān", pinyinOptions: ["chuān", "gānjìng", "chuānghù", "wǎng"], hanziOptions: ["穿", "乾淨", "窗戶", "往"] },
+        { word: "旅館", pinyin: "lǚguǎn", pinyinOptions: ["lǚguǎn", "lánsè", "yīnwèi", "zhèxiē"], hanziOptions: ["旅館", "藍色", "因為", "這些"] },
+        { word: "男", pinyin: "nán", pinyinOptions: ["nán", "ǎi", "pāi", "xiào"], hanziOptions: ["男", "矮", "拍", "笑"] },
+        { word: "矮", pinyin: "ǎi", pinyinOptions: ["ǎi", "nán", "gānjìng", "chuān"], hanziOptions: ["矮", "男", "乾淨", "穿"] },
+        { word: "乾淨", pinyin: "gānjìng", pinyinOptions: ["gānjìng", "chuānghù", "lǚguǎn", "wǎng"], hanziOptions: ["乾淨", "窗戶", "旅館", "往"] },
+        { word: "窗戶", pinyin: "chuānghù", pinyinOptions: ["chuānghù", "gānjìng", "lánsè", "yīnwèi"], hanziOptions: ["窗戶", "乾淨", "藍色", "因為"] },
+        { word: "往", pinyin: "wǎng", pinyinOptions: ["wǎng", "zhèxiē", "chuān", "lǚguǎn"], hanziOptions: ["往", "這些", "穿", "旅館"] },
+        { word: "藍色", pinyin: "lánsè", pinyinOptions: ["lánsè", "yīnwèi", "huángsè", "hóngsè"], hanziOptions: ["藍色", "因為", "黃色", "紅色"] },
+        { word: "因為", pinyin: "yīnwèi", pinyinOptions: ["yīnwèi", "zhèxiē", "lánsè", "lǚguǎn"], hanziOptions: ["因為", "這些", "藍色", "旅館"] },
+        { word: "這些", pinyin: "zhèxiē", pinyinOptions: ["zhèxiē", "yīnwèi", "wǎng", "chuānghù"], hanziOptions: ["這些", "因為", "往", "窗戶"] }
     ];
 
     let shuffledQuestions = [];
@@ -374,7 +386,7 @@
             currentAudio = null;
         }
         const q = shuffledQuestions[currentIndex];
-        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(q.word)}&tl=zh-TW&client=tw-ob`;
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(q.word)}&tl=zh-TW&client=gtx`;
         currentAudio = new Audio(audioUrl);
         currentAudio.play().catch(error => {
             console.log("Audio play failed, fallback to synthesis:", error);
@@ -440,7 +452,7 @@
         selectedHanzi = null;
         
         const q = shuffledQuestions[currentIndex];
-        document.getElementById('progress-display').innerText = `🎯 ${currentIndex + 1} / 12`;
+        document.getElementById('progress-display').innerText = `🎯 ${currentIndex + 1} / ${shuffledQuestions.length}`;
         document.getElementById('score-display').innerText = `⭐ Score: ${score}`;
 
         playGoogleTranslateAudio();
